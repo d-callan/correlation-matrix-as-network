@@ -5,7 +5,7 @@ library(DT)
 library(shinyjs)
 
 validateCorrelationMatrix <- function(corMat) {
-  return(inherits(corMat, c('matrix','data.frame')) &&
+  return(inherits(corMat, 'matrix') &&
            all(row.names(corMat) == colnames(corMat)) &&
            all(apply(corMat, c(1, 2), is.numeric)) &&
            all(apply(corMat, c(1, 2), function(x) x >= -1 && x <= 1)))
@@ -21,7 +21,7 @@ addRowNames <- function(corMat) {
 }
 
 server <- function(input, output, session) {
-  values <- reactiveValues(filteredMatrix = NULL)
+  values <- reactiveValues(correlationMatrix = NULL)
 
   observeEvent(input$fileUpload, {
     req(input$fileUpload)
@@ -38,10 +38,10 @@ server <- function(input, output, session) {
         stop('Unsupported file type')
       }
 
-      matrixData <- addRowNames(matrixData)
+      matrixData <- data.matrix(addRowNames(matrixData))
       if (validateCorrelationMatrix(matrixData)) {
         shiny::showNotification('Success: Valid correlation matrix uploaded', type = 'message')
-        values$filteredMatrix <- matrixData
+        values$correlationMatrix <- matrixData
       } else {
         shiny::showNotification('The uploaded file is not a valid correlation matrix', type = 'error')
       }
@@ -50,24 +50,39 @@ server <- function(input, output, session) {
     })
   })
 
-  observe({
-    req(input$updateFilters)
-    req(values$filteredMatrix)
+  unfilteredCorrelations <- reactive({
+    req(values$correlationMatrix)
+    unfiltered_values <- as.vector(values$correlationMatrix[lower.tri(values$correlationMatrix)])
+    return(unfiltered_values)
+  })
 
-    # Placeholder for filtering logic
-    # values$filteredMatrix <- Your filtering logic here
+  output$correlationHistogram <- renderPlot({
+    req(unfilteredCorrelations())
+    ggp_cor <- ggplot(data.frame(cor_values = unfilteredCorrelations()), aes(x=cor_values)) +
+      geom_histogram(bins = 30, fill = 'steelblue') +
+      labs(title = "Distribution of Correlation Coefficients", x = 'Correlation Coefficient', y = 'Frequency') +
+      theme_minimal()
+    
+    print(ggp_cor)
+  })
+
+  unfilteredPvalues <- reactive({
+    req(values$correlationMatrix)
+    # Placeholder for actual p-value extraction logic
+    # p_values <- extractPValues(values$correlationMatrix)
+    # just for now, until i figure out how i want to pass in the p-values
+    p_values <- abs(rnorm(length(values$correlationMatrix[lower.tri(values$correlationMatrix)]), .05, .5))*.0001
+    return(p_values)
   })
 
   output$pValueHistogram <- renderPlot({
-    req(values$filteredMatrix)
-    # Placeholder for histogram data extraction
-    # p_values <- Your p-value extraction logic here
-
-    ggp <- ggplot(data.frame(p_values), aes(x=p_values)) +
-      geom_histogram(bins = 30, fill = 'blue') +
-      labs(x = 'P-Value', y = 'Frequency') +
+    req(unfilteredPvalues())
+    # Placeholder code assuming p_values are extracted and present in unfilteredPvalues()
+    ggp_pval <- ggplot(data.frame(p_values = unfilteredPvalues()), aes(x=p_values)) +
+      geom_histogram(bins = 30, fill = 'steelblue') +
+      labs(title = "Distribution of P-Values", x = 'P-Value', y = 'Frequency') +
       theme_minimal()
 
-    print(ggp)
+    print(ggp_pval)
   })
 }

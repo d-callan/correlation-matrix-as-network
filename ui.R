@@ -23,8 +23,9 @@ ui <- fluidPage(
              fileInput("fileUpload", "Upload Correlation Matrix", accept = c(".tab", ".rds")),
              hr(),
              numericInput("correlationFilter", "Correlation Coefficient Threshold:", 0, min = -1, max = 1),
+             plotOutput("correlationHistogram"), # Add this line for the correlation histogram plot
              numericInput("pValueFilter", "P-Value Threshold:", 0, min = 0, max = 1),
-             plotOutput("pValueHistogram"),
+             plotOutput("pValueHistogram"), # Adjust the placement of this line to be after the pValueFilter input
              actionButton("updateFilters", "Update Filters"),
              hr(),
              tags$div(id = "legendPlaceholder", "Legend will be displayed here.")
