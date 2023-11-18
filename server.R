@@ -4,6 +4,8 @@ library(htmlwidgets)
 library(DT)
 library(shinyjs)
 
+source('R/bipartiteNetworkWidget.R')
+
 validateCorrelationMatrix <- function(corMat) {
   return(inherits(corMat, 'matrix') &&
            all(row.names(corMat) == colnames(corMat)) &&
@@ -70,14 +72,13 @@ server <- function(input, output, session) {
     req(values$correlationMatrix)
     # Placeholder for actual p-value extraction logic
     # p_values <- extractPValues(values$correlationMatrix)
-    # just for now, until i figure out how i want to pass in the p-values
+    # just for now, until i figure out how i want to pass get the p-values
     p_values <- abs(rnorm(length(values$correlationMatrix[lower.tri(values$correlationMatrix)]), .05, .5))*.0001
     return(p_values)
   })
 
   output$pValueHistogram <- renderPlot({
     req(unfilteredPvalues())
-    # Placeholder code assuming p_values are extracted and present in unfilteredPvalues()
     ggp_pval <- ggplot(data.frame(p_values = unfilteredPvalues()), aes(x=p_values)) +
       geom_histogram(bins = 30, fill = 'steelblue') +
       labs(title = "Distribution of P-Values", x = 'P-Value', y = 'Frequency') +
@@ -85,4 +86,26 @@ server <- function(input, output, session) {
 
     print(ggp_pval)
   })
+
+  # once we have better test data we can update this
+  # right now we have one matrix where rows and cols are the same
+  # we need two matrices w different sets of vars
+  # plus we need to pass pvalues as well
+  # also should consider taking the two data frames of raw values and calculating correlations
+  observe({
+    req(values$correlationMatrix)
+    edge_list <- expand.grid(source = row.names(values$correlationMatrix),
+                             target = colnames(values$correlationMatrix))
+    edge_list <- subset(edge_list, source != target)
+    edge_list$value <- mapply(function(source, target) {
+                                values$correlationMatrix[source, target]
+                              },
+                              edge_list$source, edge_list$target)
+print("edgeList")
+print(edge_list)
+    output$networkVisualization <- renderBipartiteNetwork({
+      bipartiteNetwork(data = edge_list)
+    })
+  })
+
 }
