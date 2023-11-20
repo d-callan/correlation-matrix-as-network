@@ -23,9 +23,8 @@ addRowNames <- function(corMat) {
 }
 
 server <- function(input, output, session) {
-  values <- reactiveValues(correlationMatrix = NULL)
 
-  observeEvent(input$fileUpload, {
+  correlationMatrix <- eventReactive(input$fileUpload, {
     req(input$fileUpload)
     file <- input$fileUpload
 
@@ -43,24 +42,27 @@ server <- function(input, output, session) {
       matrixData <- data.matrix(addRowNames(matrixData))
       if (validateCorrelationMatrix(matrixData)) {
         shiny::showNotification('Success: Valid correlation matrix uploaded', type = 'message')
-        values$correlationMatrix <- matrixData
+        return(matrixData)
       } else {
         shiny::showNotification('The uploaded file is not a valid correlation matrix', type = 'error')
       }
     }, error = function(e) {
       shiny::showNotification(paste('Error:', e$message), type = 'error')
     })
+    
+    return(NULL)
   })
-
+  
   unfilteredCorrelations <- reactive({
-    req(values$correlationMatrix)
-    unfiltered_values <- as.vector(values$correlationMatrix[lower.tri(values$correlationMatrix)])
+    correlationMatrix <- req(correlationMatrix())
+
+    unfiltered_values <- as.vector(correlationMatrix[lower.tri(correlationMatrix)])
     return(unfiltered_values)
   })
 
   output$correlationHistogram <- renderPlot({
-    req(unfilteredCorrelations())
-    corValues <- unfilteredCorrelations()
+    corValues <- req(unfilteredCorrelations())
+    
     ggplot(data.frame(cor_values = corValues), aes(x = cor_values)) +
       geom_histogram(bins = 30, fill = 'steelblue') +
       labs(title = "Distribution of Correlation Coefficients", x = 'Correlation Coefficient', y = 'Frequency') +
@@ -68,41 +70,61 @@ server <- function(input, output, session) {
   })
 
   unfilteredPvalues <- reactive({
-    req(values$correlationMatrix)
-    p_values <- abs(rnorm(length(values$correlationMatrix[lower.tri(values$correlationMatrix)]), .05, .5))*.0001
+    correlationMatrix <- req(correlationMatrix())
+    # todo fix this to take two data tables and find correlations and pvalues ourselves
+    # this is a placeholder
+    p_values <- abs(rnorm(length(correlationMatrix[lower.tri(correlationMatrix)]), .05, .5))*.0001
     return(p_values)
   })
 
   output$pValueHistogram <- renderPlot({
-    req(unfilteredPvalues())
-    pVals <- unfilteredPvalues()
+    pVals <- req(unfilteredPvalues())
+    
     ggplot(data.frame(p_values = pVals), aes(x = p_values)) +
       geom_histogram(bins = 30, fill = 'steelblue') +
       labs(title = "Distribution of P-Values", x = 'P-Value', y = 'Frequency') +
       theme_minimal()
   })
 
-  edgeList <- reactive({
-    req(values$correlationMatrix)
+  filteredCorrelationMatrix <- eventReactive({
+    input$updateFilters
+    correlationMatrix()
+  },{
+    print("filtering correlation matrix")
+    correlationMatrix <- req(correlationMatrix())
 
-    edge_list <- expand.grid(source = row.names(values$correlationMatrix),
-                             target = colnames(values$correlationMatrix))
+    filtered_values <- correlationMatrix[abs(correlationMatrix) >= input$correlationFilter]
+    # todo implement this when we fix the pvalues issue
+    #filtered_values <- filtered_values[ <= input$pValueFilter]
+    return(filtered_values)
+  })
+
+  edgeList <- reactive({
+    filteredCorrelationMatrix <- req(filteredCorrelationMatrix())
+    
+    print("creating edge list")
+    edge_list <- expand.grid(source = row.names(filteredCorrelationMatrix),
+                             target = colnames(filteredCorrelationMatrix))
     edge_list <- subset(edge_list, source != target)
     edge_list$value <- mapply(function(source, target) {
-                                values$correlationMatrix[source, target]
+                                filteredCorrelationMatrix[source, target]
                               },
                               edge_list$source, edge_list$target)
-
-    edge_list <- subset(edge_list, abs(value) >= input$correlationFilter)
-    edge_list <- subset(edge_list, value <= input$pValueFilter)
 
     print(edge_list)
     return(edge_list)
   })
 
+  output$correlationMatrix <- renderText({
+    edgeList <- req(edgeList())
+    return(class(edgeList))
+  })
+
   output$bipartiteNetwork <- renderBipartiteNetwork({
-    req(edgeList())
-    bipartiteNetwork(edgeList(), width = '100%', height = '400px')
+    #req(edgeList())
+    network <- bipartiteNetwork(edgeList(), width = '100%', height = '400px')
+    print(network)
+    return(network)
   })
 
 }

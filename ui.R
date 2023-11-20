@@ -29,6 +29,7 @@ ui <- fluidPage(
            )
     ),
     column(9,
+           textOutput("correlationMatrix"),
            bipartiteNetworkOutput("bipartiteNetwork")
     )
   )
