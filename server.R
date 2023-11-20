@@ -84,6 +84,7 @@ server <- function(input, output, session) {
 
   edgeList <- reactive({
     req(values$correlationMatrix)
+
     edge_list <- expand.grid(source = row.names(values$correlationMatrix),
                              target = colnames(values$correlationMatrix))
     edge_list <- subset(edge_list, source != target)
@@ -91,11 +92,16 @@ server <- function(input, output, session) {
                                 values$correlationMatrix[source, target]
                               },
                               edge_list$source, edge_list$target)
+
+    edge_list <- subset(edge_list, abs(value) >= input$correlationFilter)
+    edge_list <- subset(edge_list, value <= input$pValueFilter)
+
+    print(edge_list)
     return(edge_list)
   })
 
   output$bipartiteNetwork <- renderBipartiteNetwork({
-    req(values$correlationMatrix)
+    req(edgeList())
     bipartiteNetwork(edgeList(), width = '100%', height = '400px')
   })
 
