@@ -7,5 +7,5 @@ A practical example, from the microbiome space, might be the correlations betwee
 and separate column of nodes. Links between these two columns of nodes are weighted by the absolute value of the correlation coefficient and colored by the direction of the correlation.
 
 ## Currently, this is:
-An R Shiny app that uploads a file and attempts to validate it.
+An R Shiny app that uploads a file and attempts to validate it. It will produce a histogram of correlation coefficients, and a histogram of (for now, dummy) p-values. There are inputs to filter the edges of the network by correlation coefficient and p-value. Currently, the edges are only visible in a table.
 Run what I currently have, from R, like this: `shiny::runApp(launch.browser=T)`
