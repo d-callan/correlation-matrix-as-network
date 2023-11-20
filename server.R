@@ -60,39 +60,29 @@ server <- function(input, output, session) {
 
   output$correlationHistogram <- renderPlot({
     req(unfilteredCorrelations())
-    ggp_cor <- ggplot(data.frame(cor_values = unfilteredCorrelations()), aes(x=cor_values)) +
+    corValues <- unfilteredCorrelations()
+    ggplot(data.frame(cor_values = corValues), aes(x = cor_values)) +
       geom_histogram(bins = 30, fill = 'steelblue') +
       labs(title = "Distribution of Correlation Coefficients", x = 'Correlation Coefficient', y = 'Frequency') +
       theme_minimal()
-    
-    print(ggp_cor)
   })
 
   unfilteredPvalues <- reactive({
     req(values$correlationMatrix)
-    # Placeholder for actual p-value extraction logic
-    # p_values <- extractPValues(values$correlationMatrix)
-    # just for now, until i figure out how i want to pass get the p-values
     p_values <- abs(rnorm(length(values$correlationMatrix[lower.tri(values$correlationMatrix)]), .05, .5))*.0001
     return(p_values)
   })
 
   output$pValueHistogram <- renderPlot({
     req(unfilteredPvalues())
-    ggp_pval <- ggplot(data.frame(p_values = unfilteredPvalues()), aes(x=p_values)) +
+    pVals <- unfilteredPvalues()
+    ggplot(data.frame(p_values = pVals), aes(x = p_values)) +
       geom_histogram(bins = 30, fill = 'steelblue') +
       labs(title = "Distribution of P-Values", x = 'P-Value', y = 'Frequency') +
       theme_minimal()
-
-    print(ggp_pval)
   })
 
-  # once we have better test data we can update this
-  # right now we have one matrix where rows and cols are the same
-  # we need two matrices w different sets of vars
-  # plus we need to pass pvalues as well
-  # also should consider taking the two data frames of raw values and calculating correlations
-  observe({
+  edgeList <- reactive({
     req(values$correlationMatrix)
     edge_list <- expand.grid(source = row.names(values$correlationMatrix),
                              target = colnames(values$correlationMatrix))
@@ -101,11 +91,12 @@ server <- function(input, output, session) {
                                 values$correlationMatrix[source, target]
                               },
                               edge_list$source, edge_list$target)
-print("edgeList")
-print(edge_list)
-    output$networkVisualization <- renderBipartiteNetwork({
-      bipartiteNetwork(data = edge_list)
-    })
+    return(edge_list)
+  })
+
+  output$bipartiteNetwork <- renderBipartiteNetwork({
+    req(values$correlationMatrix)
+    bipartiteNetwork(edgeList(), width = '100%', height = '400px')
   })
 
 }
