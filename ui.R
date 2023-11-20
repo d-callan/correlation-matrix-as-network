@@ -15,19 +15,21 @@ ui <- fluidPage(
   fluidRow(
     column(3, 
            wellPanel(
-             fileInput("fileUpload", "Upload Correlation Matrix", accept = c(".tab", ".rds")),
+             fileInput("fileUpload", strong("Upload Correlation Matrix"), accept = c(".tab", ".rds")),
              hr(),
-             numericInput("correlationFilter", "Correlation Coefficient Threshold:", 0, min = -1, max = 1),
-             plotOutput("correlationHistogram"),
-             numericInput("pValueFilter", "P-Value Threshold:", 0, min = 0, max = 1),
-             plotOutput("pValueHistogram"),
+             numericInput("correlationFilter", strong("Correlation Coefficient Threshold:"), 0, min = -1, max = 1),
+             plotOutput("correlationHistogram", height = "200px"),
+             p(),
+             numericInput("pValueFilter", strong("P-Value Threshold:"), 0, min = 0, max = 1),
+             plotOutput("pValueHistogram", height = "200px"),
+             p(),
              actionButton("updateFilters", "Update Filters"),
              hr(),
              tags$div(id = "legendPlaceholder", "Legend will be displayed here.")
            )
     ),
     column(9,
-           htmlOutput("networkVisualization")
+           bipartiteNetworkOutput("bipartiteNetwork")
     )
   )
 )
