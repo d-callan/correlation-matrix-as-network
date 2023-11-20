@@ -1,6 +1,7 @@
 library(shiny)
 library(shinyjs)
 library(bslib)
+library(DT)
 
 ui <- fluidPage(
   theme = bs_theme(),
@@ -29,7 +30,7 @@ ui <- fluidPage(
            )
     ),
     column(9,
-           textOutput("correlationMatrix"),
+           DTOutput("correlationMatrix"),
            bipartiteNetworkOutput("bipartiteNetwork")
     )
   )

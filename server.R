@@ -86,43 +86,42 @@ server <- function(input, output, session) {
       theme_minimal()
   })
 
-  filteredCorrelationMatrix <- eventReactive({
+  edgeList <- eventReactive({
     input$updateFilters
     correlationMatrix()
-  },{
-    print("filtering correlation matrix")
-    correlationMatrix <- req(correlationMatrix())
-
-    filtered_values <- correlationMatrix[abs(correlationMatrix) >= input$correlationFilter]
-    # todo implement this when we fix the pvalues issue
-    #filtered_values <- filtered_values[ <= input$pValueFilter]
-    return(filtered_values)
-  })
-
-  edgeList <- reactive({
-    filteredCorrelationMatrix <- req(filteredCorrelationMatrix())
-    
+  }, {
     print("creating edge list")
-    edge_list <- expand.grid(source = row.names(filteredCorrelationMatrix),
-                             target = colnames(filteredCorrelationMatrix))
-    edge_list <- subset(edge_list, source != target)
+    # todo maybe use lower.tri to remove dups?
+    edge_list <- expand.grid(source = row.names(correlationMatrix()),
+                             target = colnames(correlationMatrix()))
+   
+    edge_list <- subset(edge_list, as.character(edge_list$source) != as.character(edge_list$target))
+    
     edge_list$value <- mapply(function(source, target) {
-                                filteredCorrelationMatrix[source, target]
+                                correlationMatrix()[source, target]
                               },
                               edge_list$source, edge_list$target)
-
-    print(edge_list)
+    
     return(edge_list)
   })
 
-  output$correlationMatrix <- renderText({
+  filteredEdgeList <- reactive({
     edgeList <- req(edgeList())
-    return(class(edgeList))
+print(nrow(edgeList))
+    edgeList <- subset(edgeList, abs(edgeList$value) >= input$correlationFilter)
+    edgeList <- subset(edgeList, edgeList$value <= input$pValueFilter)
+   print("filtered")
+   print(nrow(edgeList))
+    return(edgeList)
+  })
+
+  output$correlationMatrix <- renderDT({
+    edgeList <- req(filteredEdgeList())
   })
 
   output$bipartiteNetwork <- renderBipartiteNetwork({
-    #req(edgeList())
-    network <- bipartiteNetwork(edgeList(), width = '100%', height = '400px')
+    edgeList <- req(filteredEdgeList())
+    network <- bipartiteNetwork(edgeList, width = '100%', height = '400px')
     print(network)
     return(network)
   })
