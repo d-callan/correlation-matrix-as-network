@@ -1,5 +1,6 @@
 library(htmlwidgets)
 library(dplyr)
+library(r2d3)
 
 bipartiteNetwork <- function(data, width = NULL, height = NULL, elementId = NULL) {
   if (!inherits(data, "data.frame") || !all(c("source", "target", "value") %in% names(data))) {
@@ -17,7 +18,8 @@ bipartiteNetwork <- function(data, width = NULL, height = NULL, elementId = NULL
     width = width,
     height = height,
     package = 'correlationMatrixAsNetwork',
-    elementId = elementId
+    elementId = elementId,
+    dependencies = r2d3::html_dependencies_d3(version = "5")
   )
 }
 

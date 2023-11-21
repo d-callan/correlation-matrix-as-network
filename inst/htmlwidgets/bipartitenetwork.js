@@ -7,6 +7,8 @@ HTMLWidgets.widget({
         innerWidth = width - margin.left - margin.right,
         innerHeight = height - margin.top - margin.bottom;
 
+    var d3 = d3v5;
+    
     var svg = d3.select(el).append('svg')
       .attr('width', width)
       .attr('height', height)
