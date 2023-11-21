@@ -1,4 +1,4 @@
-# correlation-matrix-as-network
+# corGraph
 I recently found [gpt-pilot](https://github.com/Pythagora-io/gpt-pilot) and wanted a semi-complex project to give it a try with. I decided to port an app in development for [MicrobiomeDB](microbiomedb.org) to an R Shiny app.
 
 ## Someday, hopefully, this will be:
