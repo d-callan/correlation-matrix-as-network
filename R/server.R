@@ -15,6 +15,8 @@ addRowNames <- function(corMat) {
 }
 
 #' @importFrom DT renderDT
+#' @importFrom utils read.table
+#' @importFrom stats rnorm
 #' @import ggplot2
 server <- function(input, output, session) {
 
@@ -26,7 +28,7 @@ server <- function(input, output, session) {
 
     tryCatch({
       if (fileExtension %in% c('tab','tsv')) {
-        matrixData <- read.table(file$datapath, header = TRUE, sep = '\t')
+        matrixData <- utils::read.table(file$datapath, header = TRUE, sep = '\t')
       } else if (fileExtension == 'rds') {
         matrixData <- readRDS(file$datapath)
       } else {
@@ -67,7 +69,7 @@ server <- function(input, output, session) {
     correlationMatrix <- req(correlationMatrix())
     # todo fix this to take two data tables and find correlations and pvalues ourselves
     # this is a placeholder
-    p_values <- abs(rnorm(length(correlationMatrix[lower.tri(correlationMatrix)]), .05, .5))*.0001
+    p_values <- abs(stats::rnorm(length(correlationMatrix[lower.tri(correlationMatrix)]), .05, .5))*.0001
     return(p_values)
   })
 
