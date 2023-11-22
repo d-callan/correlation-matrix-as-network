@@ -1,7 +1,3 @@
-library(htmlwidgets)
-library(dplyr)
-library(r2d3)
-
 #' bipartiteNetwork
 #' 
 #' Create a bipartiteNetwork widget
