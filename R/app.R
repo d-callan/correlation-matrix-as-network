@@ -1,3 +1,9 @@
+#' corGraph Shiny App
+#' 
+#' Launches the corGraph Shiny App 
+#'
+#' @importFrom shiny shinyApp
+#' export
 corGraph <- function(...) {
-  shinyApp(ui, server, ...)
+  shiny::shinyApp(ui, server, ...)
 }
