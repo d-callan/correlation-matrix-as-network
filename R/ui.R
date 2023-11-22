@@ -1,36 +1,35 @@
-library(shiny)
-library(shinyjs)
-library(bslib)
-library(DT)
-
-ui <- fluidPage(
-  theme = bs_theme(),
-  tags$head(
-    tags$style(
-      HTML(".shiny-notification { position:fixed; top: calc(20%); left: calc(50%); }")
+#' @importFrom shinyjs useShinyjs
+#' @import shiny
+#' @importFrom bslib bs_theme
+#' @importFrom DT DTOutput
+ui <- shiny::fluidPage(
+  theme = bslib::bs_theme(),
+  shiny::tags$head(
+    shiny::tags$style(
+      shiny::HTML(".shiny-notification { position:fixed; top: calc(20%); left: calc(50%); }")
     )
   ),
-  useShinyjs(),
-  titlePanel("Correlation Matrix as Network Visualization"),
+  shinyjs::useShinyjs(),
+  shiny::titlePanel("Correlation Matrix as Network Visualization"),
 
-  fluidRow(
-    column(3, 
-           wellPanel(
-             fileInput("fileUpload", strong("Upload Correlation Matrix"), accept = c(".tab", ".rds")),
-             hr(),
-             numericInput("correlationFilter", strong("Correlation Coefficient Threshold:"), 0, min = -1, max = 1),
-             plotOutput("correlationHistogram", height = "200px"),
-             p(),
-             numericInput("pValueFilter", strong("P-Value Threshold:"), 0, min = 0, max = 1),
-             plotOutput("pValueHistogram", height = "200px"),
-             p(),
-             actionButton("updateFilters", "Update Filters"),
-             hr(),
-             tags$div(id = "legendPlaceholder", "Legend will be displayed here.")
+  shiny::fluidRow(
+    shiny::column(3, 
+           shiny::wellPanel(
+             shiny::fileInput("fileUpload", shiny::strong("Upload Correlation Matrix"), accept = c(".tab", ".rds")),
+             shiny::hr(),
+             shiny::numericInput("correlationFilter", shiny::strong("Correlation Coefficient Threshold:"), 0, min = -1, max = 1),
+             shiny::plotOutput("correlationHistogram", height = "200px"),
+             shiny::p(),
+             shiny::numericInput("pValueFilter", shiny::strong("P-Value Threshold:"), 0, min = 0, max = 1),
+             shiny::plotOutput("pValueHistogram", height = "200px"),
+             shiny::p(),
+             shiny::actionButton("updateFilters", "Update Filters"),
+             shiny::hr(),
+             shiny::tags$div(id = "legendPlaceholder", "Legend will be displayed here.")
            )
     ),
-    column(9,
-           DTOutput("correlationMatrix"),
+    shiny::column(9,
+           DT::DTOutput("correlationMatrix"),
            bipartiteNetworkOutput("bipartiteNetwork")
     )
   )

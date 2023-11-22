@@ -2,6 +2,9 @@ library(htmlwidgets)
 library(dplyr)
 library(r2d3)
 
+#' @import htmlwidgets
+#' @importFrom r2d3 html_dependencies_d3
+#' @import dplyr
 bipartiteNetwork <- function(data, width = NULL, height = NULL, elementId = NULL) {
   if (!inherits(data, "data.frame") || !all(c("source", "target", "value") %in% names(data))) {
     stop("Data must be a data frame with source, target, and value columns.")

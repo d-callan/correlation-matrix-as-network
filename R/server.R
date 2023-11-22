@@ -1,11 +1,3 @@
-library(shiny)
-library(ggplot2)
-library(htmlwidgets)
-library(DT)
-library(shinyjs)
-
-source('R/bipartiteNetworkWidget.R')
-
 validateCorrelationMatrix <- function(corMat) {
   return(inherits(corMat, 'matrix') &&
            all(row.names(corMat) == colnames(corMat)) &&
@@ -22,6 +14,8 @@ addRowNames <- function(corMat) {
   return(corMat)
 }
 
+#' @importFrom DT renderDT
+#' @import ggplot2
 server <- function(input, output, session) {
 
   correlationMatrix <- eventReactive(input$fileUpload, {
@@ -63,10 +57,10 @@ server <- function(input, output, session) {
   output$correlationHistogram <- renderPlot({
     corValues <- req(unfilteredCorrelations())
     
-    ggplot(data.frame(cor_values = corValues), aes(x = cor_values)) +
-      geom_histogram(bins = 30, fill = 'steelblue') +
-      labs(title = "Distribution of Correlation Coefficients", x = 'Correlation Coefficient', y = 'Frequency') +
-      theme_minimal()
+    ggplot2::ggplot(data.frame(cor_values = corValues), ggplot2::aes(x = cor_values)) +
+      ggplot2::geom_histogram(bins = 30, fill = 'steelblue') +
+      ggplot2::labs(title = "Distribution of Correlation Coefficients", x = 'Correlation Coefficient', y = 'Frequency') +
+      ggplot2::theme_minimal()
   })
 
   unfilteredPvalues <- reactive({
@@ -80,10 +74,10 @@ server <- function(input, output, session) {
   output$pValueHistogram <- renderPlot({
     pVals <- req(unfilteredPvalues())
     
-    ggplot(data.frame(p_values = pVals), aes(x = p_values)) +
-      geom_histogram(bins = 30, fill = 'steelblue') +
-      labs(title = "Distribution of P-Values", x = 'P-Value', y = 'Frequency') +
-      theme_minimal()
+    ggplot2::ggplot(data.frame(p_values = pVals), ggplot2::aes(x = p_values)) +
+      ggplot2::geom_histogram(bins = 30, fill = 'steelblue') +
+      ggplot2::labs(title = "Distribution of P-Values", x = 'P-Value', y = 'Frequency') +
+      ggplot2::theme_minimal()
   })
 
   edgeList <- eventReactive({
@@ -107,11 +101,10 @@ server <- function(input, output, session) {
 
   filteredEdgeList <- reactive({
     edgeList <- req(edgeList())
-print(nrow(edgeList))
+
     edgeList <- subset(edgeList, abs(edgeList$value) >= input$correlationFilter)
     edgeList <- subset(edgeList, edgeList$value <= input$pValueFilter)
-   print("filtered")
-   print(nrow(edgeList))
+
     return(edgeList)
   })
 
