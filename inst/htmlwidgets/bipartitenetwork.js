@@ -12,43 +12,76 @@ HTMLWidgets.widget({
     var svg = d3.select(el).append('svg')
       .attr('width', width)
       .attr('height', height)
-      .append('g')
       .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
     function renderValue(x) {
       svg.selectAll('*').remove();
 
-      var xScale = d3.scaleOrdinal().domain(['source', 'target']).range([0, innerWidth]);
-      var yScale = d3.scalePoint().range([0, innerHeight])
-        .domain(d3.map(x.data, function(d){ return d.source; }).keys());
+      var tallestColumnSize = Math.max(x.data.column1NodeIds.length, x.data.column2NodeIds.length)
 
-      svg.selectAll('.node')
-        .data(x.data)
-        .enter()
-        .append('circle')
-        .attr('class', 'node')
-        .attr('r', 5)
-        .attr('cx', function(d) { return xScale('source'); })
-        .attr('cy', function(d) { return yScale(d.source); })
-        .enter()
-        .append('circle')
-        .attr('class', 'target')
-        .attr('r', 5)
-        .attr('cx', function(d) { return xScale('target'); })
-        .attr('cy', function(d, i) { return (i * (innerHeight / x.data.length)); })
-        .attr('fill', 'orange');
+      function getNodeId(d) {
+        console.log(d);
+        return(d);
+      }
 
+      function findNodeCX(d, isColumn1) {
+        var cx = isColumn1 ? innerWidth / 6 : innerWidth / 6 * 5;
+        console.log(cx)
+        return(cx)
+      }
+
+      function findNodeCY(d, i) {
+        return(i * (innerHeight / tallestColumnSize) + 10)
+      }
+
+      function findLinkY1(d) {
+        const isCurrentSourceNode = (element) => element === d.source;
+        var i = x.data.column1NodeIds.findIndex(isCurrentSourceNode);
+        var y1 = findNodeCY(d, i);
+        console.log("link y1: ", y1);
+        return(y1);
+      }
+
+      function findLinkY2(d) {
+        const isCurrentTargetNode = (element) => element === d.target;
+        var i = x.data.column2NodeIds.findIndex(isCurrentTargetNode);
+        var y2 = findNodeCY(d, i);
+        console.log("link y2: ", y2);
+        return(y2);
+      }
+  
       svg.selectAll('.link')
-        .data(x.data)
+        .data(x.data.links)
         .enter()
         .append('line')
         .attr('class', 'link')
-        .attr('x1', function(d) { return xScale('source'); })
-        .attr('y1', function(d) { return yScale(d.source); })
-        .attr('x2', function(d) { return xScale('target'); })
-        .attr('y2', function(d, i) { return (i * (innerHeight / x.data.length)); })
-        .style('stroke', function(d) { return d.value > 0 ? 'green' : 'red'; })
+        .attr('x1', d => findNodeCX(d, true))
+        .attr('y1', d => findLinkY1(d))
+        .attr('x2', d => findNodeCX(d, false))
+        .attr('y2', d => findLinkY2(d))
+        .style('stroke', function(d) { return d.value > 0 ? 'blue' : 'red'; })
         .style('stroke-width', function(d) { return Math.abs(d.value) * 2; });
+  
+      svg.selectAll('.node')
+        .data(x.data.column1NodeIds)
+        .enter()
+        .append('circle')
+        .attr('id', d => getNodeId(d))
+        .attr('class', 'node')
+        .attr('r', 5)
+        .attr('cx', d => findNodeCX(d, true))
+        .attr('cy', (d,i) => findNodeCY(d,i))
+        .enter()
+        .data(x.data.column2NodeIds)
+        .enter()
+        .append('circle')
+        .attr('id', d => getNodeId(d))
+        .attr('class', 'node')
+        .attr('r', 5)
+        .attr('cx', d => findNodeCX(d, false))
+        .attr('cy', (d,i) => findNodeCY(d,i));
+  
+  return svg.node();
     }
 
     return {

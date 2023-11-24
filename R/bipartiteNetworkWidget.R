@@ -22,7 +22,7 @@ bipartiteNetwork <- function(data, width = NULL, height = NULL, elementId = NULL
 
   htmlwidgets::createWidget(
     name = 'bipartitenetwork',
-    x = list(data = edge_data),
+    x = list(data = list(links = edge_data, column1NodeIds = unique_sources, column2NodeIds = unique_targets)),
     width = width,
     height = height,
     package = 'correlationMatrixAsNetwork',
