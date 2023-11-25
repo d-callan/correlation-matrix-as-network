@@ -86,17 +86,14 @@ server <- function(input, output, session) {
     input$updateFilters
     correlationMatrix()
   }, {
-    print("creating edge list")
-    # todo maybe use lower.tri to remove dups?
-    edge_list <- expand.grid(source = row.names(correlationMatrix()),
-                             target = colnames(correlationMatrix()))
-   
-    edge_list <- subset(edge_list, as.character(edge_list$source) != as.character(edge_list$target))
+    corrResult <- correlationMatrix()
     
-    edge_list$value <- mapply(function(source, target) {
-                                correlationMatrix()[source, target]
-                              },
-                              edge_list$source, edge_list$target)
+    edge_list <- expand.grid(source = row.names(corrResult),
+                             target = colnames(corrResult))
+   
+    deDupedEdges <- edge_list[as.vector(upper.tri(corrResult)),]
+    edge_list <- cbind(deDupedEdges, corrResult[upper.tri(corrResult)])
+    colnames(edge_list) <- c("source","target","value")
     
     return(edge_list)
   })
@@ -110,7 +107,7 @@ server <- function(input, output, session) {
     return(edgeList)
   })
 
-  output$correlationMatrix <- renderDT({
+  output$correlationMatrix <- DT::renderDT({
     edgeList <- req(filteredEdgeList())
   })
 
