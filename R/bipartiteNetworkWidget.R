@@ -24,7 +24,7 @@ bipartiteNetwork <- function(data, width = NULL, height = NULL, elementId = NULL
   params <- list(data = list(links = edge_data, column1NodeIds = unique_sources, column2NodeIds = unique_targets))
   attr(params, 'TOJSON_ARGS') <- list(dataframe = 'rows')
   
-  htmlwidgets::createWidget(
+  network <- htmlwidgets::createWidget(
     name = 'bipartitenetwork',
     x = params,
     width = width,
@@ -33,6 +33,8 @@ bipartiteNetwork <- function(data, width = NULL, height = NULL, elementId = NULL
     elementId = elementId,
     dependencies = r2d3::html_dependencies_d3(version = "5")
   )
+
+  return(network)
 }
 
 #' Shiny bindings for bipartiteNetwork

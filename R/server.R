@@ -113,9 +113,7 @@ server <- function(input, output, session) {
 
   output$bipartiteNetwork <- renderBipartiteNetwork({
     edgeList <- req(filteredEdgeList())
-    network <- bipartiteNetwork(edgeList, width = '100%', height = '400px')
-    print(network)
-    return(network)
+    bipartiteNetwork(edgeList, width = '100%', height = '400px')
   })
 
 }

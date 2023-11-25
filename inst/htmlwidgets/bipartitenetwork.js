@@ -20,13 +20,11 @@ HTMLWidgets.widget({
       var tallestColumnSize = Math.max(x.data.column1NodeIds.length, x.data.column2NodeIds.length)
 
       function getNodeId(d) {
-        console.log(d);
         return(d);
       }
 
       function findNodeCX(d, isColumn1) {
         var cx = isColumn1 ? innerWidth / 6 : innerWidth / 6 * 5;
-        console.log(cx)
         return(cx)
       }
 
@@ -38,7 +36,6 @@ HTMLWidgets.widget({
         const isCurrentSourceNode = (element) => element === d.source;
         var i = x.data.column1NodeIds.findIndex(isCurrentSourceNode);
         var y1 = findNodeCY(d, i);
-        console.log("link y1: ", y1);
         return(y1);
       }
 
@@ -46,10 +43,9 @@ HTMLWidgets.widget({
         const isCurrentTargetNode = (element) => element === d.target;
         var i = x.data.column2NodeIds.findIndex(isCurrentTargetNode);
         var y2 = findNodeCY(d, i);
-        console.log("link y2: ", y2);
         return(y2);
       }
-  
+      
       svg.selectAll('.link')
         .data(x.data.links)
         .enter()
@@ -91,8 +87,8 @@ HTMLWidgets.widget({
         svg.attr('width', newWidth).attr('height', newHeight);
         innerWidth = newWidth - margin.left - margin.right;
         innerHeight = newHeight - margin.top - margin.bottom;
-        xScale.range([0, innerWidth]);
-        yScale.range([0, innerHeight]);
+        //xScale.range([0, innerWidth]);
+        //yScale.range([0, innerHeight]);
         renderValue(svg.datum());
       }
     };
