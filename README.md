@@ -19,3 +19,5 @@ Outside of playing w gpt-pilot, I think this is a cool app and want to do some h
 * run the correlation myself and produce real p-values
 * add labels to the nodes in the network diagram
 * make the network interactive so you get a scatter plot when you click an edge
+* remove the update filters button, or actually use it
+* add a legend, and move it into the network tab
