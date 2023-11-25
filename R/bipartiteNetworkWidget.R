@@ -14,6 +14,7 @@ bipartiteNetwork <- function(data, width = NULL, height = NULL, elementId = NULL
   if (!inherits(data, "data.frame") || !all(c("source", "target", "value") %in% names(data))) {
     stop("Data must be a data frame with source, target, and value columns.")
   }
+  
   unique_sources <- unique(data$source)
   unique_targets <- unique(data$target)
   edge_data <- data %>% 
@@ -25,7 +26,7 @@ bipartiteNetwork <- function(data, width = NULL, height = NULL, elementId = NULL
     x = list(data = list(links = edge_data, column1NodeIds = unique_sources, column2NodeIds = unique_targets)),
     width = width,
     height = height,
-    package = 'correlationMatrixAsNetwork',
+    package = 'corGraph',
     elementId = elementId,
     dependencies = r2d3::html_dependencies_d3(version = "5")
   )
@@ -39,7 +40,7 @@ bipartiteNetwork <- function(data, width = NULL, height = NULL, elementId = NULL
 #' @param width,height Must be a valid CSS unit (like \code{'100\%'}, '400px', or 'auto')
 #' @export
 bipartiteNetworkOutput <- function(outputId, width = '100%', height = '400px'){
-  htmlwidgets::shinyWidgetOutput(outputId, 'bipartitenetwork', width, height, package = 'correlationMatrixAsNetwork')
+  htmlwidgets::shinyWidgetOutput(outputId, 'bipartitenetwork', width, height, package = 'corGraph')
 }
 
 #' Shiny bindings for bipartiteNetwork
