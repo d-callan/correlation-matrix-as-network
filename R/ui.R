@@ -29,8 +29,15 @@ ui <- shiny::fluidPage(
            )
     ),
     shiny::column(9,
-           DT::DTOutput("correlationMatrix"),
-           bipartiteNetworkOutput("bipartiteNetwork")
+           tabsetPanel(
+             type = "tabs",
+             tabPanel("Network",
+               bipartiteNetworkOutput("bipartiteNetwork")
+             ),
+             tabPanel("Table",
+               DT::DTOutput("correlationMatrix") 
+             )
+           )
     )
   )
 )
