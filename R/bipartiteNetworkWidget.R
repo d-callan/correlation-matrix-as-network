@@ -21,9 +21,12 @@ bipartiteNetwork <- function(data, width = NULL, height = NULL, elementId = NULL
     filter(source %in% unique_sources & target %in% unique_targets) %>%
     distinct(source, target, .keep_all = TRUE)
 
+  params <- list(data = list(links = edge_data, column1NodeIds = unique_sources, column2NodeIds = unique_targets))
+  attr(params, 'TOJSON_ARGS') <- list(dataframe = 'rows')
+  
   htmlwidgets::createWidget(
     name = 'bipartitenetwork',
-    x = list(data = list(links = edge_data, column1NodeIds = unique_sources, column2NodeIds = unique_targets)),
+    x = params,
     width = width,
     height = height,
     package = 'corGraph',
