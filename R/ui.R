@@ -15,7 +15,8 @@ ui <- shiny::fluidPage(
   shiny::fluidRow(
     shiny::column(3, 
            shiny::wellPanel(
-             shiny::fileInput("fileUpload", shiny::strong("Upload Correlation Matrix"), accept = c(".tab", ".rds")),
+             shiny::fileInput("fileUpload", shiny::strong("Upload Data Table"), accept = c(".tab", "tsv",".rds")),
+             shiny::fileInput("fileUpload2", shiny::strong("Upload Second Data Table (optional)"), accept = c(".tab", "tsv",".rds")),
              shiny::hr(),
              shiny::numericInput("correlationFilter", shiny::strong("Correlation Coefficient Threshold:"), 0, min = -1, max = 1),
              shiny::plotOutput("correlationHistogram", height = "200px"),
