@@ -17,11 +17,13 @@ readData <- function(file) {
 
 #' @importFrom DT renderDT
 #' @importFrom utils read.table
-#' @importFrom stats rnorm
+#' @importFrom Hmisc rcorr
 #' @import ggplot2
 server <- function(input, output, session) {
+  correlationMatrix <- shiny::reactiveValues(corr_matrix = NULL)
+  pValuesMatrix <- shiny::reactiveValues(p_values = NULL)
 
-  correlationMatrix <- eventReactive({
+  shiny::observeEvent({
     input$fileUpload
     input$fileUpload2
   }, {
@@ -34,24 +36,29 @@ server <- function(input, output, session) {
         data2 <- readData(file2)
       }
 
-      corrData <- cor(data1, data2, use = 'na.or.complete')
-      return(corrData)
+      numData1Cols <- length(data1)
+      numData2Cols <- length(data2)
+
+      corrData <- Hmisc::rcorr(as.matrix(data1), as.matrix(data2))
+      pValuesMatrix$p_values <- corrData$P[1:numData1Cols, 1:numData2Cols]
+      correlationMatrix$corr_matrix <- corrData$r[1:numData1Cols, 1:numData2Cols]
     }, error = function(e) {
       shiny::showNotification(paste('Error:', e$message), type = 'error')
     })
-    
-    return(NULL)
   })
   
   unfilteredCorrelations <- reactive({
-    correlationMatrix <- req(correlationMatrix())
+    unfiltered_values <- as.vector(correlationMatrix$corr_matrix)
 
-    unfiltered_values <- as.vector(correlationMatrix[lower.tri(correlationMatrix)])
+    # ill leave this in case i decide to support unipartite networks as well in the same app
+    #unfiltered_values <- as.vector(correlationMatrix[lower.tri(correlationMatrix)])
     return(unfiltered_values)
   })
 
   output$correlationHistogram <- renderPlot({
     corValues <- req(unfilteredCorrelations())
+    print("corValues:")
+    print(corValues)
     
     ggplot2::ggplot(data.frame(cor_values = corValues), ggplot2::aes(x = cor_values)) +
       ggplot2::geom_histogram(bins = 30, fill = 'steelblue') +
@@ -60,10 +67,8 @@ server <- function(input, output, session) {
   })
 
   unfilteredPvalues <- reactive({
-    correlationMatrix <- req(correlationMatrix())
-    # todo fix this to take two data tables and find correlations and pvalues ourselves
-    # this is a placeholder
-    p_values <- abs(stats::rnorm(length(correlationMatrix[lower.tri(correlationMatrix)]), .05, .5))*.0001
+    p_values <- as.vector(pValuesMatrix$p_values)
+
     return(p_values)
   })
 
@@ -77,14 +82,17 @@ server <- function(input, output, session) {
   })
 
   edgeList <- reactive({
-    corrResult <- correlationMatrix()
+    corrResult <- correlationMatrix$corr_matrix
+    pVals <- pValuesMatrix$p_values
     
     edge_list <- expand.grid(source = row.names(corrResult),
                              target = colnames(corrResult))
    
     deDupedEdges <- edge_list[as.vector(upper.tri(corrResult)),]
     edge_list <- cbind(deDupedEdges, corrResult[upper.tri(corrResult)])
-    colnames(edge_list) <- c("source","target","value")
+    edge_list <- cbind(edge_list, pVals[upper.tri(pVals)])
+
+    colnames(edge_list) <- c("source","target","value","p_value")
     
     return(edge_list)
   })
@@ -93,7 +101,7 @@ server <- function(input, output, session) {
     edgeList <- req(edgeList())
 
     edgeList <- subset(edgeList, abs(edgeList$value) >= input$correlationFilter)
-    edgeList <- subset(edgeList, edgeList$value <= input$pValueFilter)
+    edgeList <- subset(edgeList, edgeList$p_value <= input$pValueFilter)
 
     return(edgeList)
   })
