@@ -21,18 +21,14 @@ ui <- shiny::fluidPage(
              shiny::plotOutput("correlationHistogram", height = "200px"),
              shiny::p(),
              shiny::numericInput("pValueFilter", shiny::strong("P-Value Threshold:"), 0, min = 0, max = 1),
-             shiny::plotOutput("pValueHistogram", height = "200px"),
-             shiny::p(),
-             shiny::actionButton("updateFilters", "Update Filters"),
-             shiny::hr(),
-             shiny::tags$div(id = "legendPlaceholder", "Legend will be displayed here.")
+             shiny::plotOutput("pValueHistogram", height = "200px")
            )
     ),
     shiny::column(9,
            tabsetPanel(
              type = "tabs",
              tabPanel("Network",
-               bipartiteNetworkOutput("bipartiteNetwork")
+                bipartiteNetworkOutput("bipartiteNetwork"), # need to add node labels and legend here
              ),
              tabPanel("Table",
                DT::DTOutput("correlationMatrix") 
