@@ -1,17 +1,18 @@
-validateCorrelationMatrix <- function(corMat) {
-  return(inherits(corMat, 'matrix') &&
-           all(row.names(corMat) == colnames(corMat)) &&
-           all(apply(corMat, c(1, 2), is.numeric)) &&
-           all(apply(corMat, c(1, 2), function(x) x >= -1 && x <= 1)))
-}
-
-addRowNames <- function(corMat) {
-  if (all(row.names(corMat) != colnames(corMat))) {
-    warning("No rownames found in correlation matrix. Will use column names for row names as well.")
-    row.names(corMat) <- colnames(corMat)
+readData <- function(file) {
+  if (is.null(file)) {
+    return(NULL)
   }
 
-  return(corMat)
+  fileExtension <- tools::file_ext(file$name)
+  if (fileExtension %in% c('tab','tsv')) {
+    matrixData <- utils::read.table(file$datapath, header = TRUE, sep = '\t')
+  } else if (fileExtension == 'rds') {
+    matrixData <- readRDS(file$datapath)
+  } else {
+    stop('Unsupported file type')
+  }
+
+  return(matrixData)
 }
 
 #' @importFrom DT renderDT
@@ -20,28 +21,21 @@ addRowNames <- function(corMat) {
 #' @import ggplot2
 server <- function(input, output, session) {
 
-  correlationMatrix <- eventReactive(input$fileUpload, {
-    req(input$fileUpload)
-    file <- input$fileUpload
-
-    fileExtension <- tools::file_ext(file$name)
+  correlationMatrix <- eventReactive({
+    input$fileUpload
+    input$fileUpload2
+  }, {
+    file1 <- req(input$fileUpload)
+    file2 <- input$fileUpload2
 
     tryCatch({
-      if (fileExtension %in% c('tab','tsv')) {
-        matrixData <- utils::read.table(file$datapath, header = TRUE, sep = '\t')
-      } else if (fileExtension == 'rds') {
-        matrixData <- readRDS(file$datapath)
-      } else {
-        stop('Unsupported file type')
+      data1 <- readData(file1)
+      if (!is.null(file2)) {
+        data2 <- readData(file2)
       }
 
-      matrixData <- data.matrix(addRowNames(matrixData))
-      if (validateCorrelationMatrix(matrixData)) {
-        shiny::showNotification('Success: Valid correlation matrix uploaded', type = 'message')
-        return(matrixData)
-      } else {
-        shiny::showNotification('The uploaded file is not a valid correlation matrix', type = 'error')
-      }
+      corrData <- cor(data1, data2, use = 'na.or.complete')
+      return(corrData)
     }, error = function(e) {
       shiny::showNotification(paste('Error:', e$message), type = 'error')
     })
