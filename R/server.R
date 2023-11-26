@@ -82,10 +82,7 @@ server <- function(input, output, session) {
       ggplot2::theme_minimal()
   })
 
-  edgeList <- eventReactive({
-    input$updateFilters
-    correlationMatrix()
-  }, {
+  edgeList <- reactive({
     corrResult <- correlationMatrix()
     
     edge_list <- expand.grid(source = row.names(corrResult),
