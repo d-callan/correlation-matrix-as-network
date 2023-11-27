@@ -28,6 +28,11 @@ HTMLWidgets.widget({
         return(cx)
       }
 
+      function findNodeLabelX(d, isColumn1) {
+        var cx = isColumn1 ? findNodeCX(d, isColumn1) - 50 : findNodeCX(d, isColumn1) + 10;
+        return(cx)
+      }
+
       function findNodeCY(d, i) {
         return(i * (innerHeight / tallestColumnSize) + 10)
       }
@@ -58,24 +63,45 @@ HTMLWidgets.widget({
         .style('stroke', function(d) { return d.value > 0 ? 'blue' : 'red'; })
         .style('stroke-width', function(d) { return Math.abs(d.value) * 2; });
   
-      svg.selectAll('.node')
+      let sources = 
+      svg.selectAll('.node-source')
         .data(x.data.column1NodeIds)
         .enter()
+        .append('g')
+        .attr('class', 'node');
+
+      sources  
         .append('circle')
         .attr('id', d => getNodeId(d))
-        .attr('class', 'node')
         .attr('r', 5)
         .attr('cx', d => findNodeCX(d, true))
-        .attr('cy', (d,i) => findNodeCY(d,i))
-        .enter()
+        .attr('cy', (d,i) => findNodeCY(d,i));
+
+      sources  
+        .append('text')
+        .attr('x', d => findNodeLabelX(d, true))
+        .attr('y', (d,i) => findNodeCY(d,i))
+        .text(d => getNodeId(d));
+
+      let targets =
+      svg.selectAll('.node-target')
         .data(x.data.column2NodeIds)
         .enter()
+        .append('g')
+        .attr('class', 'node');
+
+      targets
         .append('circle')
         .attr('id', d => getNodeId(d))
-        .attr('class', 'node')
         .attr('r', 5)
         .attr('cx', d => findNodeCX(d, false))
         .attr('cy', (d,i) => findNodeCY(d,i));
+
+      targets
+        .append('text')
+        .attr('x', d => findNodeLabelX(d, false)) 
+        .attr('y', (d,i) => findNodeCY(d,i))
+        .text(d => getNodeId(d));
   
   return svg.node();
     }

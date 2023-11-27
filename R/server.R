@@ -57,8 +57,6 @@ server <- function(input, output, session) {
 
   output$correlationHistogram <- renderPlot({
     corValues <- req(unfilteredCorrelations())
-    print("corValues:")
-    print(corValues)
     
     ggplot2::ggplot(data.frame(cor_values = corValues), ggplot2::aes(x = cor_values)) +
       ggplot2::geom_histogram(bins = 30, fill = 'steelblue') +
