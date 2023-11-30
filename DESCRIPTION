@@ -8,13 +8,16 @@ Authors@R:
            email = "dmleake92@gmail.com"))
 Imports:
     bslib,
+    data.table,
     dplyr,
     DT,
     ggplot2,
+    Hmisc,
     htmlwidgets,
     r2d3,
     shiny,
-    shinyjs
+    shinyjs,
+    shinyWidgets
 URL: https://github.com/d-callan/corGraph
 BugReports: https://github.com/d-callan/corGraph/issues
 Description: A Shiny app to build network diagrams of correlation matrices, plus some supporting htmlwidgets.
