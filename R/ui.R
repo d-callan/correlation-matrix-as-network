@@ -21,7 +21,7 @@ ui <- shiny::fluidPage(
              shiny::numericInput("correlationFilter", shiny::strong("Correlation Coefficient Threshold:"), 0, min = -1, max = 1),
              shiny::plotOutput("correlationHistogram", height = "200px"),
              shiny::p(),
-             shiny::numericInput("pValueFilter", shiny::strong("P-Value Threshold:"), 0, min = 0, max = 1),
+             shiny::numericInput("pValueFilter", shiny::strong("P-Value Threshold:"), 0.05, min = 0, max = 1),
              shiny::plotOutput("pValueHistogram", height = "200px")
            )
     ),
