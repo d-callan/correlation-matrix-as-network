@@ -13,6 +13,8 @@ Once the app has started, use the provided test files in `inst/extdata`.
 
 ## Some things I really need to do
 Outside of playing w gpt-pilot, I think this is a cool app and want to do some housekeeping so that it can actually be destributed as a package. So I need to:
+* let users reset the file inputs
+* research and add more correlation methods, or other association metrics
 * write some tests
 * make the network interactive so you get a scatter plot when you click an edge
 * add a legend
