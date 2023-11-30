@@ -7,7 +7,8 @@ ui <- shiny::fluidPage(
   theme = bslib::bs_theme(),
   shiny::tags$head(
     shiny::tags$style(
-      shiny::HTML(".shiny-notification { position:fixed; top: calc(20%); left: calc(50%); }")
+      shiny::HTML(".shiny-notification { position:fixed; top: calc(20%); left: calc(50%); }"),
+      shiny::HTML("hr { margin-top: 10px; margin-bottom: 10px }")
     )
   ),
   shinyjs::useShinyjs(),
