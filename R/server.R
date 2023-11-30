@@ -119,6 +119,10 @@ server <- function(input, output, session) {
   filteredEdgeList <- reactive({
     edgeList <- req(edgeList())
 
+    if (is.null(edgeList)) {
+      return(NULL)
+    }
+
     edgeList <- subset(edgeList, abs(edgeList$value) >= input$correlationFilter)
     edgeList <- subset(edgeList, edgeList$p_value <= input$pValueFilter)
 
@@ -127,11 +131,18 @@ server <- function(input, output, session) {
 
   output$correlationMatrix <- DT::renderDT({
     edgeList <- req(filteredEdgeList())
+    return(edgeList)
   })
 
   output$bipartiteNetwork <- renderBipartiteNetwork({
     edgeList <- req(filteredEdgeList())
-    bipartiteNetwork(edgeList, width = '100%', height = '400px')
+
+    if (is.null(edgeList)) {
+      return(NULL)
+    }
+
+    network <- bipartiteNetwork(edgeList, width = '100%', height = '400px')
+    return(network)
   })
 
 }
