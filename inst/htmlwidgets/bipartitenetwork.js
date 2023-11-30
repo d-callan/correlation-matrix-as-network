@@ -61,7 +61,7 @@ HTMLWidgets.widget({
         .attr('x2', d => findNodeCX(d, false))
         .attr('y2', d => findLinkY2(d))
         .style('stroke', function(d) { return d.value > 0 ? "#0EADA5" : "#AD3C00"; })
-        .style('stroke-width', function(d) { return Math.abs(d.value) * 2; });
+        .style('stroke-width', function(d) { return -1 * Math.log(d.p_value); });
   
       let sources = 
       svg.selectAll('.node-source')
@@ -75,7 +75,9 @@ HTMLWidgets.widget({
         .attr('id', d => getNodeId(d))
         .attr('r', 5)
         .attr('cx', d => findNodeCX(d, true))
-        .attr('cy', (d,i) => findNodeCY(d,i));
+        .attr('cy', (d,i) => findNodeCY(d,i))
+        .style('fill', 'white')
+        .style('stroke', 'black');
 
       sources  
         .append('text')
@@ -95,7 +97,9 @@ HTMLWidgets.widget({
         .attr('id', d => getNodeId(d))
         .attr('r', 5)
         .attr('cx', d => findNodeCX(d, false))
-        .attr('cy', (d,i) => findNodeCY(d,i));
+        .attr('cy', (d,i) => findNodeCY(d,i))
+        .style('fill', 'white')
+        .style('stroke', 'black');
 
       targets
         .append('text')
