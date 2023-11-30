@@ -2,6 +2,7 @@
 #' @import shiny
 #' @importFrom bslib bs_theme
 #' @importFrom DT DTOutput
+#' @importFrom shinyWidgets switchInput
 ui <- shiny::fluidPage(
   theme = bslib::bs_theme(),
   shiny::tags$head(
@@ -18,9 +19,20 @@ ui <- shiny::fluidPage(
              shiny::fileInput("fileUpload", shiny::strong("Upload Data Table"), accept = c(".tab", "tsv",".rds")),
              shiny::fileInput("fileUpload2", shiny::strong("Upload Second Data Table (optional)"), accept = c(".tab", "tsv",".rds")),
              shiny::hr(),
-             selectInput("correlationMethod", shiny::strong("Correlation Method:"),
+             div(style="display:inline-block",
+              selectInput("correlationMethod", shiny::strong("Correlation Parameters:"),
                 c("Spearman" = "spearman",
-                  "Pearson" = "pearson")),
+                  "Pearson" = "pearson"))
+             ),
+             div(style="display:inline-block",
+              shinyWidgets::switchInput("dataAreCompositonal", "log transform", 
+                value = FALSE,
+                onLabel = "Yes",
+                offLabel = "No",
+                size = "normal",
+                inline = TRUE,
+                labelWidth = "100px")
+             ),
              shiny::p(),
              shiny::numericInput("correlationFilter", shiny::strong("Correlation Coefficient Threshold:"), 0, min = -1, max = 1),
              shiny::plotOutput("correlationHistogram", height = "200px"),
