@@ -37,6 +37,8 @@ server <- function(input, output, session) {
       data1 <- readData(file1)
       if (!is.null(file2)) {
         data2 <- readData(file2)
+      } else {
+        data2 <- NULL
       }
 
       lastData1ColIndex <- length(data1)
