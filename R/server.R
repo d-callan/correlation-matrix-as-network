@@ -28,6 +28,7 @@ server <- function(input, output, session) {
   shiny::observeEvent({
     input$fileUpload
     input$fileUpload2
+    input$correlationMethod
   }, {
     file1 <- req(input$fileUpload)
     file2 <- input$fileUpload2
@@ -40,7 +41,7 @@ server <- function(input, output, session) {
 
       lastData1ColIndex <- length(data1)
       firstData2ColIndex <- length(data1) + 1
-      corrResult <- Hmisc::rcorr(as.matrix(data1), as.matrix(data2))
+      corrResult <- Hmisc::rcorr(as.matrix(data1), as.matrix(data2), type = input$correlationMethod)
       
       # this bc Hmisc::rcorr cbinds the two data.tables and runs the correlation
       # so we need to extract only the relevant values
@@ -110,7 +111,6 @@ server <- function(input, output, session) {
     #edge_list <- cbind(edge_list, pVals[upper.tri(pVals)])
 
     #colnames(edge_list) <- c("source","target","value","p_value")
-    
     return(edge_list)
   })
 
