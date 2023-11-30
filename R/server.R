@@ -18,6 +18,8 @@ readData <- function(file) {
 #' @importFrom DT renderDT
 #' @importFrom utils read.table
 #' @importFrom Hmisc rcorr
+#' @importFrom data.table as.data.table
+#' @importFrom data.table melt
 #' @import ggplot2
 server <- function(input, output, session) {
   correlationMatrix <- shiny::reactiveValues(corr_matrix = NULL)
@@ -80,17 +82,32 @@ server <- function(input, output, session) {
   })
 
   edgeList <- reactive({
-    corrResult <- correlationMatrix$corr_matrix
-    pVals <- pValuesMatrix$p_values
-    
-    edge_list <- expand.grid(source = row.names(corrResult),
-                             target = colnames(corrResult))
-   
-    deDupedEdges <- edge_list[as.vector(upper.tri(corrResult)),]
-    edge_list <- cbind(deDupedEdges, corrResult[upper.tri(corrResult)])
-    edge_list <- cbind(edge_list, pVals[upper.tri(pVals)])
+    corrResult <- data.table::as.data.table(req(correlationMatrix$corr_matrix), keep.rownames = TRUE)
+    pVals <- data.table::as.data.table(req(pValuesMatrix$p_values), keep.rownames = TRUE)
 
-    colnames(edge_list) <- c("source","target","value","p_value")
+    if (is.null(corrResult) || is.null(pVals)) {
+      return(NULL)
+    }
+
+    meltedCorrResult <- data.table::melt(corrResult, id.vars=c('rn'))
+    meltedPVals <- data.table::melt(pVals, id.vars=c('rn'))
+    edge_list <- data.frame(
+      source = meltedCorrResult[['rn']],
+      target = meltedCorrResult[['variable']],
+      value = meltedCorrResult[['value']],
+      # should we do a merge just to be sure?
+      p_value = meltedPVals[['value']]
+    )
+
+    # leave this in case i decide to support unipartite networks as well in the same app    
+    #edge_list <- expand.grid(source = row.names(corrResult),
+    #                         target = colnames(corrResult))
+    #
+    #deDupedEdges <- edge_list[as.vector(upper.tri(corrResult)),]
+    #edge_list <- cbind(deDupedEdges, corrResult[upper.tri(corrResult)])
+    #edge_list <- cbind(edge_list, pVals[upper.tri(pVals)])
+
+    #colnames(edge_list) <- c("source","target","value","p_value")
     
     return(edge_list)
   })
