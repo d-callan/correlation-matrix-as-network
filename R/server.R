@@ -22,38 +22,48 @@ readData <- function(file) {
 #' @importFrom data.table melt
 #' @import ggplot2
 server <- function(input, output, session) {
+  data1 <- shiny::reactiveValues(matrix = NULL)
+  data2 <- shiny::reactiveValues(matrix = NULL)
   correlationMatrix <- shiny::reactiveValues(corr_matrix = NULL)
   pValuesMatrix <- shiny::reactiveValues(p_values = NULL)
 
   shiny::observeEvent({
     input$fileUpload
     input$fileUpload2
-    input$correlationMethod
   }, {
     file1 <- req(input$fileUpload)
     file2 <- input$fileUpload2
 
     tryCatch({
-      data1 <- readData(file1)
+      data1$matrix <- readData(file1)
       if (!is.null(file2)) {
-        data2 <- readData(file2)
-      } else {
-        data2 <- NULL
+        data2$matrix <- readData(file2)
       }
 
-      lastData1ColIndex <- length(data1)
-      firstData2ColIndex <- length(data1) + 1
-      corrResult <- Hmisc::rcorr(as.matrix(data1), as.matrix(data2), type = input$correlationMethod)
-      
-      # this bc Hmisc::rcorr cbinds the two data.tables and runs the correlation
-      # so we need to extract only the relevant values
-      pValuesMatrix$p_values <- corrResult$P[1:lastData1ColIndex, firstData2ColIndex:length(colnames(corrResult$P))]
-      correlationMatrix$corr_matrix <- corrResult$r[1:lastData1ColIndex, firstData2ColIndex:length(colnames(corrResult$r))]
     }, error = function(e) {
       shiny::showNotification(paste('Error:', e$message), type = 'error')
     })
   })
   
+  shiny::observeEvent({
+    data1$matrix
+    data2$matrix
+    input$correlationMethod
+  }, {
+    if (is.null(data1$matrix)) {
+      return(NULL)
+    }
+
+    lastData1ColIndex <- length(data1$matrix)
+    firstData2ColIndex <- length(data1$matrix) + 1
+    corrResult <- Hmisc::rcorr(as.matrix(data1$matrix), as.matrix(data2$matrix), type = input$correlationMethod)
+     
+    # this bc Hmisc::rcorr cbinds the two data.tables and runs the correlation
+    # so we need to extract only the relevant values
+    pValuesMatrix$p_values <- corrResult$P[1:lastData1ColIndex, firstData2ColIndex:length(colnames(corrResult$P))]
+    correlationMatrix$corr_matrix <- corrResult$r[1:lastData1ColIndex, firstData2ColIndex:length(colnames(corrResult$r))]
+  })
+
   unfilteredCorrelations <- reactive({
     unfiltered_values <- as.vector(correlationMatrix$corr_matrix)
 
