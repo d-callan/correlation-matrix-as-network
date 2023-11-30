@@ -41,13 +41,11 @@ server <- function(input, output, session) {
       lastData1ColIndex <- length(data1)
       firstData2ColIndex <- length(data1) + 1
       corrResult <- Hmisc::rcorr(as.matrix(data1), as.matrix(data2))
-      print(corrResult)
+      
       # this bc Hmisc::rcorr cbinds the two data.tables and runs the correlation
       # so we need to extract only the relevant values
       pValuesMatrix$p_values <- corrResult$P[1:lastData1ColIndex, firstData2ColIndex:length(colnames(corrResult$P))]
-      print(pValuesMatrix$p_values)
       correlationMatrix$corr_matrix <- corrResult$r[1:lastData1ColIndex, firstData2ColIndex:length(colnames(corrResult$r))]
-      print(correlationMatrix$corr_matrix)
     }, error = function(e) {
       shiny::showNotification(paste('Error:', e$message), type = 'error')
     })
