@@ -26,10 +26,15 @@ server <- function(input, output, session) {
   data2 <- shiny::reactiveValues(matrix = NULL)
   correlationMatrix <- shiny::reactiveValues(corr_matrix = NULL)
   pValuesMatrix <- shiny::reactiveValues(p_values = NULL)
+  upload_state <- reactiveValues(file1 = NULL, file2 = NULL)
 
   output$file1 <- renderUI({
     input$resetData ## Create a dependency with the reset button
     shiny::fileInput("fileUpload", shiny::strong("Upload Data Table"), accept = c(".tab", "tsv",".rds"))
+  })
+
+  observeEvent(input$fileUpload, {
+    upload_state$file1 <- 'uploaded'
   })
 
   output$file2 <- renderUI({
@@ -37,24 +42,44 @@ server <- function(input, output, session) {
     shiny::fileInput("fileUpload2", shiny::strong("Upload Second Data Table (optional)"), accept = c(".tab", "tsv",".rds"))
   })
 
+  observeEvent(input$fileUpload2, {
+    upload_state$file2 <- 'uploaded'
+  })
+
   shiny::observeEvent(input$resetData, {
+    print("resetting data")
     data1$matrix <- NULL
     data2$matrix <- NULL
     correlationMatrix$corr_matrix <- NULL
     pValuesMatrix$p_values <- NULL
+    upload_state$file1 <- "reset"
+    upload_state$file2 <- "reset"
   })
 
   shiny::observeEvent({
-    input$fileUpload
-    input$fileUpload2
+    upload_state$file1
+    upload_state$file2
   }, {
-    file1 <- req(input$fileUpload)
-    file2 <- input$fileUpload2
+    if (upload_state$file1 == 'reset' && upload_state$file2 == 'reset') {
+      file1 <- NULL
+      file2 <- NULL
+    } else if (upload_state$file1 == 'uploaded' && (is.null(upload_state$file2) || upload_state$file2 == 'reset')) {
+      shiny::showNotification('Please upload the second file.', type = 'error')
+      #file1 <- input$fileUpload
+      #file2 <- NULL
+    } else if (upload_state$file2 == 'uploaded' && (is.null(upload_state$file1) || upload_state$file1 == 'reset')) {
+      shiny::showNotification('Please upload the first file first.', type = 'error')
+    } else {
+      file1 <- input$fileUpload
+      file2 <- input$fileUpload2
+    }
 
     tryCatch({
-      data1$matrix <- readData(file1)
-      if (!is.null(file2)) {
-        data2$matrix <- readData(file2)
+      if (!is.null(file1)) {
+        data1$matrix <- readData(file1)
+        if (!is.null(file2)) {
+          data2$matrix <- readData(file2)
+        }
       }
 
     }, error = function(e) {
