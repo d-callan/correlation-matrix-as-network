@@ -65,8 +65,8 @@ server <- function(input, output, session) {
       file2 <- NULL
     } else if (upload_state$file1 == 'uploaded' && (is.null(upload_state$file2) || upload_state$file2 == 'reset')) {
       shiny::showNotification('Please upload the second file.', type = 'error')
-      #file1 <- input$fileUpload
-      #file2 <- NULL
+      file1 <- input$fileUpload
+      file2 <- NULL
     } else if (upload_state$file2 == 'uploaded' && (is.null(upload_state$file1) || upload_state$file1 == 'reset')) {
       shiny::showNotification('Please upload the first file first.', type = 'error')
     } else {
@@ -96,21 +96,26 @@ server <- function(input, output, session) {
       return(NULL)
     }
 
-    lastData1ColIndex <- length(data1$matrix)
-    firstData2ColIndex <- length(data1$matrix) + 1
-    corrResult <- Hmisc::rcorr(as.matrix(data1$matrix), as.matrix(data2$matrix), type = input$correlationMethod)
-     
-    # this bc Hmisc::rcorr cbinds the two data.tables and runs the correlation
-    # so we need to extract only the relevant values
-    pValuesMatrix$p_values <- corrResult$P[1:lastData1ColIndex, firstData2ColIndex:length(colnames(corrResult$P))]
-    correlationMatrix$corr_matrix <- corrResult$r[1:lastData1ColIndex, firstData2ColIndex:length(colnames(corrResult$r))]
+    if (is.null(data2$matrix)) {
+      corrResult <- Hmisc::rcorr(as.matrix(data1$matrix), type = input$correlationMethod)
+
+      # deduplicate
+      pValuesMatrix$p_values <- corrResult$P[lower.tri(corrResult$P)]
+      correlationMatrix$corr_matrix <- corrResult$r[lower.tri(corrResult$r)]
+    } else {
+      lastData1ColIndex <- length(data1$matrix)
+      firstData2ColIndex <- length(data1$matrix) + 1
+      corrResult <- Hmisc::rcorr(as.matrix(data1$matrix), as.matrix(data2$matrix), type = input$correlationMethod)
+
+      # this bc Hmisc::rcorr cbinds the two data.tables and runs the correlation
+      # so we need to extract only the relevant values
+      pValuesMatrix$p_values <- corrResult$P[1:lastData1ColIndex, firstData2ColIndex:length(colnames(corrResult$P))]
+      correlationMatrix$corr_matrix <- corrResult$r[1:lastData1ColIndex, firstData2ColIndex:length(colnames(corrResult$r))]
+    }     
   })
 
   unfilteredCorrelations <- reactive({
     unfiltered_values <- as.vector(correlationMatrix$corr_matrix)
-
-    # ill leave this in case i decide to support unipartite networks as well in the same app
-    #unfiltered_values <- as.vector(correlationMatrix[lower.tri(correlationMatrix)])
     return(unfiltered_values)
   })
 
