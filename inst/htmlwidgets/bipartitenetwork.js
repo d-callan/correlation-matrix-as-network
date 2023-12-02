@@ -117,8 +117,7 @@ HTMLWidgets.widget({
         svg.attr('width', newWidth).attr('height', newHeight);
         innerWidth = newWidth - margin.left - margin.right;
         innerHeight = newHeight - margin.top - margin.bottom;
-        //xScale.range([0, innerWidth]);
-        //yScale.range([0, innerHeight]);
+        // TODO make sure resizing works
         renderValue(svg.datum());
       }
     };
