@@ -27,6 +27,23 @@ server <- function(input, output, session) {
   correlationMatrix <- shiny::reactiveValues(corr_matrix = NULL)
   pValuesMatrix <- shiny::reactiveValues(p_values = NULL)
 
+  output$file1 <- renderUI({
+    input$resetData ## Create a dependency with the reset button
+    shiny::fileInput("fileUpload", shiny::strong("Upload Data Table"), accept = c(".tab", "tsv",".rds"))
+  })
+
+  output$file2 <- renderUI({
+    input$resetData
+    shiny::fileInput("fileUpload2", shiny::strong("Upload Second Data Table (optional)"), accept = c(".tab", "tsv",".rds"))
+  })
+
+  shiny::observeEvent(input$resetData, {
+    data1$matrix <- NULL
+    data2$matrix <- NULL
+    correlationMatrix$corr_matrix <- NULL
+    pValuesMatrix$p_values <- NULL
+  })
+
   shiny::observeEvent({
     input$fileUpload
     input$fileUpload2

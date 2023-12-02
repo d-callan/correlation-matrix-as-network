@@ -17,8 +17,9 @@ ui <- shiny::fluidPage(
   shiny::fluidRow(
     shiny::column(3, 
            shiny::wellPanel(
-             shiny::fileInput("fileUpload", shiny::strong("Upload Data Table"), accept = c(".tab", "tsv",".rds")),
-             shiny::fileInput("fileUpload2", shiny::strong("Upload Second Data Table (optional)"), accept = c(".tab", "tsv",".rds")),
+             uiOutput('file1'),
+             uiOutput('file2'),
+             shiny::actionButton("resetData", shiny::strong("Reset Data")),
              shiny::hr(),
              #div(style="display:inline-block",
               selectInput("correlationMethod", shiny::strong("Correlation Method:"),
