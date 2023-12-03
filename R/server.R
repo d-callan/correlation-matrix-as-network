@@ -97,30 +97,17 @@ server <- function(input, output, session) {
     }
 
     if (is.null(data2$matrix)) {
-      corrResult <- Hmisc::rcorr(as.matrix(data1$matrix), type = input$correlationMethod)
+      corrResult <- Hmisc::rcorr(as.matrix(data1$matrix), type = input$correlationMethod)  
+    } else {   
+      corrResult <- Hmisc::rcorr(as.matrix(data1$matrix), as.matrix(data2$matrix), type = input$correlationMethod)    
+    }    
 
-      # deduplicate
-      pValuesMatrix$p_values <- corrResult$P[lower.tri(corrResult$P)]
-      correlationMatrix$corr_matrix <- corrResult$r[lower.tri(corrResult$r)]
-    } else {
-      lastData1ColIndex <- length(data1$matrix)
-      firstData2ColIndex <- length(data1$matrix) + 1
-      corrResult <- Hmisc::rcorr(as.matrix(data1$matrix), as.matrix(data2$matrix), type = input$correlationMethod)
-
-      # this bc Hmisc::rcorr cbinds the two data.tables and runs the correlation
-      # so we need to extract only the relevant values
-      pValuesMatrix$p_values <- corrResult$P[1:lastData1ColIndex, firstData2ColIndex:length(colnames(corrResult$P))]
-      correlationMatrix$corr_matrix <- corrResult$r[1:lastData1ColIndex, firstData2ColIndex:length(colnames(corrResult$r))]
-    }     
-  })
-
-  unfilteredCorrelations <- reactive({
-    unfiltered_values <- as.vector(correlationMatrix$corr_matrix)
-    return(unfiltered_values)
+    pValuesMatrix$p_values <- corrResult$P
+    correlationMatrix$corr_matrix <- corrResult$r
   })
 
   output$correlationHistogram <- renderPlot({
-    corValues <- req(unfilteredCorrelations())
+    corValues <- req(edgeList()$value)
     
     ggplot2::ggplot(data.frame(cor_values = corValues), ggplot2::aes(x = cor_values)) +
       ggplot2::geom_histogram(bins = 30, fill = 'steelblue') +
@@ -128,14 +115,8 @@ server <- function(input, output, session) {
       ggplot2::theme_minimal()
   })
 
-  unfilteredPvalues <- reactive({
-    p_values <- as.vector(pValuesMatrix$p_values)
-
-    return(p_values)
-  })
-
   output$pValueHistogram <- renderPlot({
-    pVals <- req(unfilteredPvalues())
+    pVals <- req(edgeList()$p_value)
     
     ggplot2::ggplot(data.frame(p_values = pVals), ggplot2::aes(x = p_values)) +
       ggplot2::geom_histogram(bins = 30, fill = 'steelblue') +
@@ -143,33 +124,54 @@ server <- function(input, output, session) {
       ggplot2::theme_minimal()
   })
 
-  edgeList <- reactive({
-    corrResult <- data.table::as.data.table(req(correlationMatrix$corr_matrix), keep.rownames = TRUE)
-    pVals <- data.table::as.data.table(req(pValuesMatrix$p_values), keep.rownames = TRUE)
-
-    if (is.null(corrResult) || is.null(pVals)) {
+  edgeList <- eventReactive({
+    correlationMatrix$corr_matrix
+    pValuesMatrix$p_values
+  },{
+    if (is.null(correlationMatrix$corr_matrix) || is.null(pValuesMatrix$p_values)) {
       return(NULL)
     }
 
-    meltedCorrResult <- data.table::melt(corrResult, id.vars=c('rn'))
-    meltedPVals <- data.table::melt(pVals, id.vars=c('rn'))
-    edge_list <- data.frame(
-      source = meltedCorrResult[['rn']],
-      target = meltedCorrResult[['variable']],
-      value = meltedCorrResult[['value']],
-      # should we do a merge just to be sure?
-      p_value = meltedPVals[['value']]
-    )
+    if (is.null(data2$matrix)) {
+      # deduplicate
+      pVals <- pValuesMatrix$p_values
+      corrResult <- correlationMatrix$corr_matrix
 
-    # leave this in case i decide to support unipartite networks as well in the same app    
-    #edge_list <- expand.grid(source = row.names(corrResult),
-    #                         target = colnames(corrResult))
-    #
-    #deDupedEdges <- edge_list[as.vector(upper.tri(corrResult)),]
-    #edge_list <- cbind(deDupedEdges, corrResult[upper.tri(corrResult)])
-    #edge_list <- cbind(edge_list, pVals[upper.tri(pVals)])
+      edge_list <- expand.grid(source = row.names(corrResult),
+                               target = colnames(corrResult))
+    
+      deDupedEdges <- edge_list[as.vector(upper.tri(corrResult)),]
+      edge_list <- cbind(deDupedEdges, corrResult[upper.tri(corrResult)])
+      edge_list <- cbind(edge_list, pVals[upper.tri(pVals)])
 
-    #colnames(edge_list) <- c("source","target","value","p_value")
+      colnames(edge_list) <- c("source","target","value","p_value")
+    } else {
+      lastData1ColIndex <- length(data1$matrix)
+      firstData2ColIndex <- length(data1$matrix) + 1
+
+      # this bc Hmisc::rcorr cbinds the two data.tables and runs the correlation
+      # so we need to extract only the relevant values
+      p_values <- pValuesMatrix$p_values[1:lastData1ColIndex, firstData2ColIndex:length(colnames(pValuesMatrix$p_values))]
+      corr_matrix <- correlationMatrix$corr_matrix[1:lastData1ColIndex, firstData2ColIndex:length(colnames(correlationMatrix$corr_matrix))]
+
+      corr_matrix <- data.table::as.data.table(corr_matrix, keep.rownames = TRUE)
+      p_values <- data.table::as.data.table(p_values, keep.rownames = TRUE)
+
+      if (is.null(corr_matrix) || is.null(p_values)) {
+        return(NULL)
+      }
+
+      meltedCorrResult <- data.table::melt(corr_matrix, id.vars=c('rn'))
+      meltedPVals <- data.table::melt(p_values, id.vars=c('rn'))
+      edge_list <- data.frame(
+        source = meltedCorrResult[['rn']],
+        target = meltedCorrResult[['variable']],
+        value = meltedCorrResult[['value']],
+        # should we do a merge just to be sure?
+        p_value = meltedPVals[['value']]
+      )
+    }
+  
     return(edge_list)
   })
 
