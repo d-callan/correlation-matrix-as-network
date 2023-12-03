@@ -193,6 +193,29 @@ server <- function(input, output, session) {
     return(edgeList)
   })
 
+  output$correlationNetwork <- renderUI({
+    if (is.null(data1$matrix)) {
+      return(NULL)
+    } else {
+      if (is.null(data2$matrix)) {
+        unipartiteNetworkOutput("unipartiteNetwork")
+      } else {
+        bipartiteNetworkOutput("bipartiteNetwork")
+      }
+    }
+  })
+
+  output$unipartiteNetwork <- renderUnipartiteNetwork({
+    edgeList <- req(filteredEdgeList())
+
+    if (is.null(edgeList)) {
+      return(NULL)
+    }
+
+    network <- unipartiteNetwork(edgeList, width = '100%', height = '400px')
+    return(network)
+  })
+
   output$bipartiteNetwork <- renderBipartiteNetwork({
     edgeList <- req(filteredEdgeList())
 

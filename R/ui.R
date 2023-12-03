@@ -49,7 +49,7 @@ ui <- shiny::fluidPage(
            tabsetPanel(
              type = "tabs",
              tabPanel("Network",
-                bipartiteNetworkOutput("bipartiteNetwork"), # need to add node labels and legend here
+                uiOutput("correlationNetwork")
              ),
              tabPanel("Table",
                DT::DTOutput("correlationMatrix") 
