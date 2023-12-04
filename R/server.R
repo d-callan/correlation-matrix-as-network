@@ -64,7 +64,6 @@ server <- function(input, output, session) {
       file1 <- NULL
       file2 <- NULL
     } else if (upload_state$file1 == 'uploaded' && (is.null(upload_state$file2) || upload_state$file2 == 'reset')) {
-      shiny::showNotification('Please upload the second file.', type = 'error')
       file1 <- input$fileUpload
       file2 <- NULL
     } else if (upload_state$file2 == 'uploaded' && (is.null(upload_state$file1) || upload_state$file1 == 'reset')) {
@@ -193,6 +192,7 @@ server <- function(input, output, session) {
     return(edgeList)
   })
 
+  # eventually offer the option to show either bipartite or unipartite for any input data
   output$correlationNetwork <- renderUI({
     if (is.null(data1$matrix)) {
       return(NULL)

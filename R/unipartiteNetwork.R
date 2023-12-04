@@ -21,7 +21,7 @@ unipartiteNetwork <- function(data, width = NULL, height = NULL, elementId = NUL
     filter(source %in% unique_sources & target %in% unique_targets) %>%
     distinct(source, target, .keep_all = TRUE)
 
-  params <- list(data = list(links = edge_data, column1NodeIds = unique_sources, column2NodeIds = unique_targets))
+  params <- list(data = list(links = edge_data, nodes = data.frame(id = unique(c(unique_sources, unique_targets)))))
   attr(params, 'TOJSON_ARGS') <- list(dataframe = 'rows')
   
   network <- htmlwidgets::createWidget(
