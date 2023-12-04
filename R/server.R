@@ -47,7 +47,7 @@ server <- function(input, output, session) {
   })
 
   shiny::observeEvent(input$resetData, {
-    print("resetting data")
+    print("Resetting data...")
     data1$matrix <- NULL
     data2$matrix <- NULL
     correlationMatrix$corr_matrix <- NULL
@@ -56,10 +56,14 @@ server <- function(input, output, session) {
     upload_state$file2 <- "reset"
   })
 
-  shiny::observeEvent({
-    upload_state$file1
-    upload_state$file2
-  }, {
+  listenForFileUPloads <- reactive({
+    list(upload_state$file1, upload_state$file2)
+  })
+
+  shiny::observeEvent(listenForFileUPloads(), {
+    if (is.null(input$fileUpload) && is.null(input$fileUpload2)) {
+      return(NULL)
+    }
     if (upload_state$file1 == 'reset' && upload_state$file2 == 'reset') {
       file1 <- NULL
       file2 <- NULL
@@ -170,7 +174,7 @@ server <- function(input, output, session) {
         p_value = meltedPVals[['value']]
       )
     }
-  
+
     return(edge_list)
   })
 
