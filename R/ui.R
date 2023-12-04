@@ -21,22 +21,9 @@ ui <- shiny::fluidPage(
              uiOutput('file2'),
              shiny::actionButton("resetData", shiny::strong("Reset Data")),
              shiny::hr(),
-             #div(style="display:inline-block",
               selectInput("correlationMethod", shiny::strong("Correlation Method:"),
                 c("Spearman" = "spearman",
                   "Pearson" = "pearson")),
-             #),
-             # commenting this for now. after reading https://www.nature.com/articles/ismej2015235
-             # i think i want to add more methods and maybe the ability to filter rare taxa prior to correlation
-             #div(style="display:inline-block",
-             # shinyWidgets::switchInput("dataAreCompositonal", "log transform", 
-             #   value = FALSE,
-             #   onLabel = "Yes",
-             #   offLabel = "No",
-             #   size = "normal",
-             #   inline = TRUE,
-             #   labelWidth = "100px")
-             #),
              shiny::p(),
              shiny::numericInput("correlationFilter", shiny::strong("Correlation Coefficient Threshold:"), 0, min = -1, max = 1),
              shiny::plotOutput("correlationHistogram", height = "200px"),
