@@ -3,6 +3,7 @@
 #' @importFrom bslib bs_theme
 #' @importFrom DT DTOutput
 #' @importFrom shinyWidgets switchInput
+#' @include unipartiteNetwork.R
 ui <- shiny::fluidPage(
   theme = bslib::bs_theme(),
   shiny::tags$head(
@@ -36,7 +37,7 @@ ui <- shiny::fluidPage(
            tabsetPanel(
              type = "tabs",
              tabPanel("Network",
-                uiOutput("correlationNetwork")
+               uiOutput("correlationNetwork")
              ),
              tabPanel("Table",
                DT::DTOutput("correlationMatrix") 

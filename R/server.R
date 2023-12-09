@@ -27,6 +27,8 @@ server <- function(input, output, session) {
   correlationMatrix <- shiny::reactiveValues(corr_matrix = NULL)
   pValuesMatrix <- shiny::reactiveValues(p_values = NULL)
   upload_state <- reactiveValues(file1 = NULL, file2 = NULL)
+  output$correlationNetwork <- shiny::renderUI({})
+  outputOptions(output, "correlationNetwork", suspendWhenHidden = FALSE)
 
   output$file1 <- renderUI({
     input$resetData ## Create a dependency with the reset button
@@ -212,7 +214,7 @@ server <- function(input, output, session) {
   output$unipartiteNetwork <- renderUnipartiteNetwork({
     edgeList <- req(filteredEdgeList())
 
-    if (is.null(edgeList)) {
+    if (is.null(edgeList) || nrow(edgeList) == 0 || !is.null(data2$matrix)) {
       return(NULL)
     }
 
@@ -223,7 +225,7 @@ server <- function(input, output, session) {
   output$bipartiteNetwork <- renderBipartiteNetwork({
     edgeList <- req(filteredEdgeList())
 
-    if (is.null(edgeList)) {
+    if (is.null(edgeList) || nrow(edgeList) == 0 || is.null(data2$matrix)) {
       return(NULL)
     }
 
