@@ -61,7 +61,7 @@ HTMLWidgets.widget({
         .attr('x2', d => findNodeCX(d, false))
         .attr('y2', d => findLinkY2(d))
         .style('stroke', function(d) { return d.value > 0 ? "#0EADA5" : "#AD3C00"; })
-        .style('stroke-width', function(d) { return -1 * Math.log(d.p_value); });
+        .style('stroke-width', function(d) { return 2 * Math.abs(d.value); });
   
       let sources = 
       svg.selectAll('.node-source')

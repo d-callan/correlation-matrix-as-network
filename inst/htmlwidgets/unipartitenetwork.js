@@ -32,8 +32,8 @@ HTMLWidgets.widget({
 			  .data(links)
 			  .enter()
 			  .append("polyline") //Create as polyline for arrows
-			  .attr("stroke", "Gray")
-			  .attr("stroke-width",d => Math.sqrt(d.value)) // Set default stroke width
+        .attr('stroke', function(d) { return d.value > 0 ? "#0EADA5" : "#AD3C00"; })
+        .attr('stroke-width', function(d) { return 2 * Math.abs(d.value); })
 			  .attr("marker-mid", "url(#end)");  // Add Marker
 
       // Create nodes
@@ -44,6 +44,8 @@ HTMLWidgets.widget({
         .enter()
         .append("circle")
         .attr("r", 5)
+        .attr('fill', 'white')
+        .attr('stroke', 'black')
 			  //.attr("r", d=>5+d.degree) // add degree to data later to bring this back
 			  .call(d3.drag(simulation)).attr('class', 'node');
   
@@ -105,7 +107,7 @@ HTMLWidgets.widget({
           return 1;
         });
         link.style('opacity',1);
-        link.style('stroke-width', d => Math.sqrt(d.value));
+        link.style('stroke-width', function(d) { return 2 * Math.abs(d.value); });
         d3.select("#tooltip").remove();
       });
    
