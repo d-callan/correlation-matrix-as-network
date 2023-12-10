@@ -6,6 +6,9 @@
 \usage{
 corGraph(...)
 }
+\arguments{
+\item{...}{arguments to pass to \code{shinyApp}}
+}
 \description{
 Launches the corGraph Shiny App
 }
