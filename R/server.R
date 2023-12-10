@@ -22,6 +22,8 @@ readData <- function(file) {
 #' @importFrom data.table melt
 #' @import ggplot2
 server <- function(input, output, session) {
+  options(shiny.maxRequestSize=30*1024^2) # 30 MB
+
   data1 <- shiny::reactiveValues(matrix = NULL)
   data2 <- shiny::reactiveValues(matrix = NULL)
   correlationMatrix <- shiny::reactiveValues(corr_matrix = NULL)
