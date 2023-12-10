@@ -206,9 +206,11 @@ server <- function(input, output, session) {
       return(NULL)
     } else {
       if (is.null(data2$matrix)) {
-        unipartiteNetworkOutput("unipartiteNetwork")
+        unipartiteNetworkOutput("unipartiteNetwork", width = '100%', height = '1000px')
       } else {
-        bipartiteNetworkOutput("bipartiteNetwork")
+        height <- max(length(data1$matrix), length(data2$matrix))
+        height <- paste0(height * 50, 'px')
+        bipartiteNetworkOutput("bipartiteNetwork", width = '100%', height = height)
       }
     }
   })
@@ -220,7 +222,7 @@ server <- function(input, output, session) {
       return(NULL)
     }
 
-    network <- unipartiteNetwork(edgeList, width = '100%', height = '400px')
+    network <- unipartiteNetwork(edgeList)
     return(network)
   })
 
@@ -230,8 +232,8 @@ server <- function(input, output, session) {
     if (is.null(edgeList) || nrow(edgeList) == 0 || is.null(data2$matrix)) {
       return(NULL)
     }
-
-    network <- bipartiteNetwork(edgeList, width = '100%', height = '400px')
+    
+    network <- bipartiteNetwork(edgeList)
     return(network)
   })
 
