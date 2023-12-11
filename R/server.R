@@ -60,11 +60,11 @@ server <- function(input, output, session) {
     upload_state$file2 <- "reset"
   })
 
-  listenForFileUPloads <- reactive({
+  listenForFileUploads <- reactive({
     list(upload_state$file1, upload_state$file2)
   })
 
-  shiny::observeEvent(listenForFileUPloads(), {
+  shiny::observeEvent(listenForFileUploads(), {
     if (is.null(input$fileUpload) && is.null(input$fileUpload2)) {
       return(NULL)
     }
