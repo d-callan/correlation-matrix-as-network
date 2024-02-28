@@ -18,8 +18,8 @@ Imports:
     shiny,
     shinyjs,
     shinyWidgets
-URL: https://github.com/d-callan/corGraph
-BugReports: https://github.com/d-callan/corGraph/issues
+URL: https://github.com/microbiomeDB/corGraph
+BugReports: https://github.com/microbiomeDB/corGraph/issues
 Description: A Shiny app to build network diagrams of correlation matrices, plus some supporting htmlwidgets.
 License: MIT + file LICENSE
 Encoding: UTF-8
