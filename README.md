@@ -3,9 +3,39 @@
   <!-- badges: end -->
 
 # corGraph
-I recently found [gpt-pilot](https://github.com/Pythagora-io/gpt-pilot) and wanted a semi-complex project to give it a try with. I decided to port an app in development for [MicrobiomeDB](microbiomedb.org) to an R Shiny app. That was super fun, and I have no regrets, but it didn't last more than a few days. I think gpt-pilot managed to add a single file input, the correlation coefficient and p-value histograms and filter inputs... that was about it.
 
-## Currently, this is:
-An R Shiny app that uploads a file and generates a bunch of pairwise correlations with p-values. If an optional second file is provided it will find the pairwise correlations only between the data in the two files. It will produce a histogram of correlation coefficients, and a histogram of p-values. There are inputs to filter the edges of the network by correlation coefficient and p-value. Currently, the edges are visible in a network and a table. If you provided a single input file you will get a network diagram in the regular way. If you provide two input files you will get a bipartite network with two columns of rodes, where each column represents a file and each node a variable in the file.
-Run what I currently have, after installing the package in R, like this: `corGraph::corGraph()`
-Once the app has started, use the provided test files in `inst/extdata`. If you would like to test the unipartite network, I recommend the file `mpg-all-continuous.tsv`. If you would like to test the bipartite network, I would recommend the files `mpg-cty-hwy.tsv` and `mpg-year-cyl.tsv`.
+This package is home to some html widgets which build interactive correlation network diagrams. It also contains a Shiny app where you can upload 1-2 data tables, produce correlation coefficients and p-values and then visualize the results with the custom widgets.
+
+The widgets are designed to re-create the diagrams from the MicrobiomeDB.org correlation apps. They are built in d3 and are admittedly a bit of a work-in-progress currently. If you would like to use them with microbiome (or similar) data in R, see our [MicrobiomeDB](https://github.com/microbiomedb/MicrobiomeDB) package.
+
+
+## Installation
+
+Use the R package [remotes](https://cran.r-project.org/web/packages/remotes/index.html) to install corGraph. From the R command prompt:
+
+```R
+remotes::install_github('microbiomeDB/corGraph')
+```
+
+## Usage
+
+After installing the package, you can launch the shiny app like this: 
+
+```R
+corGraph::corGraph() 
+```
+
+Once the app has started, use the provided test files in inst/extdata. If you would like to test the unipartite network, we recommend the file mpg-all-continuous.tsv. If you would like to test the bipartite network, we would recommend the files mpg-cty-hwy.tsv and mpg-year-cyl.tsv.
+
+
+## Contributing
+
+Pull requests are welcome and should be made to the **dev** branch.
+
+For major changes, please open an issue first to discuss what you would like to change.
+
+Please make sure to update tests as appropriate.
+
+
+## License
+[Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
