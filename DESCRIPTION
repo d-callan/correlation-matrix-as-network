@@ -1,6 +1,6 @@
 Package: corGraph
 Title: Correlation Matrices As Networks
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R: 
   c(person(given = "Danielle",
            family = "Callan",
@@ -21,7 +21,6 @@ Imports:
 URL: https://github.com/microbiomeDB/corGraph
 BugReports: https://github.com/microbiomeDB/corGraph/issues
 Description: A Shiny app to build network diagrams of correlation matrices, plus some supporting htmlwidgets.
-License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
@@ -39,3 +38,4 @@ Config/testthat/edition: 3
 Depends: 
     R (>= 2.10)
 LazyData: true
+License: Apache License (>= 2)
